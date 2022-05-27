@@ -9,7 +9,7 @@ use std::{
     io::{self, Stdout},
     thread, time,
 };
-use widgets::{draw, draw_empty};
+use widgets::Widget5x5;
 
 fn main() {
     let mut stdout = io::stdout();
@@ -17,10 +17,10 @@ fn main() {
 
     let delay = time::Duration::from_millis(1000);
 
+    let mut w = Widget5x5::new(1, 1);
     for i in 0..=9 {
-        draw(&mut stdout, 1, 1, i).unwrap();
+        w.draw(&mut stdout, i).unwrap();
         thread::sleep(delay);
-        draw_empty(&mut stdout, 1, i);
     }
 
     teardown_terminal(&mut stdout).unwrap();
