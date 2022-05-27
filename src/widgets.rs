@@ -4,10 +4,15 @@ use std::io::{Stdout, Write};
 
 type Frame = Vec<Vec<&'static str>>;
 
+/// A 5x5 box anchored to a starting position.
+/// The box will know how to draw a number given
+/// to the `draw` funtion.
+/// As an optimization, the box will not redraw an
+/// identical, already drawn, number.
 pub struct Widget5x5 {
     x: usize,
     y: usize,
-    cur_num: usize, // to optimize: do not redraw an identical number
+    cur_num: usize,
 }
 
 impl Widget5x5 {
@@ -42,10 +47,12 @@ impl Widget5x5 {
     }
 }
 
+/// Draw an empty 5x5 box.
 pub fn draw_empty(stdout: &mut Stdout, start_x: usize, start_y: usize) {
     draw_widget(stdout, start_x, start_y, empty_5x5_frame());
 }
 
+/// Draw the given box.
 pub fn draw_widget(stdout: &mut Stdout, start_x: usize, start_y: usize, frame: Frame) {
     for (y, col) in frame.iter().enumerate() {
         for (x, s) in col.iter().enumerate() {
@@ -60,6 +67,12 @@ pub fn draw_widget(stdout: &mut Stdout, start_x: usize, start_y: usize, frame: F
     stdout.flush().unwrap();
 }
 
+/// Representing a `colon` character.
+pub fn colon_frame() -> Frame {
+    vec![vec![" "], vec!["O"], vec![" "], vec!["O"], vec![" "]]
+}
+
+/// Representing an empty 5x5 box.
 pub fn empty_5x5_frame() -> Frame {
     vec![
         vec![" ", " ", " ", " ", " "],
@@ -70,16 +83,18 @@ pub fn empty_5x5_frame() -> Frame {
     ]
 }
 
+/// Representing the number `1` as a 5x5 box.
 pub fn one_5x5_frame() -> Frame {
     vec![
-        vec![" ", " ", " ", " ", "X"],
-        vec![" ", " ", " ", "X", "X"],
-        vec![" ", " ", " ", " ", "X"],
-        vec![" ", " ", " ", " ", "X"],
-        vec![" ", " ", " ", " ", "X"],
+        vec![" ", " ", " ", "X", " "],
+        vec![" ", " ", "X", "X", " "],
+        vec![" ", " ", " ", "X", " "],
+        vec![" ", " ", " ", "X", " "],
+        vec![" ", " ", " ", "X", " "],
     ]
 }
 
+/// Representing the number `2` as a 5x5 box.
 pub fn two_5x5_frame() -> Frame {
     vec![
         vec!["X", "X", "X", "X", " "],
@@ -90,6 +105,7 @@ pub fn two_5x5_frame() -> Frame {
     ]
 }
 
+/// Representing the number `3` as a 5x5 box.
 pub fn three_5x5_frame() -> Frame {
     vec![
         vec!["X", "X", "X", "X", " "],
@@ -100,6 +116,7 @@ pub fn three_5x5_frame() -> Frame {
     ]
 }
 
+/// Representing the number `4` as a 5x5 box.
 pub fn four_5x5_frame() -> Frame {
     vec![
         vec![" ", "X", " ", " ", "X"],
@@ -110,6 +127,7 @@ pub fn four_5x5_frame() -> Frame {
     ]
 }
 
+/// Representing the number `5` as a 5x5 box.
 pub fn five_5x5_frame() -> Frame {
     vec![
         vec![" ", "X", "X", "X", "X"],
@@ -120,6 +138,7 @@ pub fn five_5x5_frame() -> Frame {
     ]
 }
 
+/// Representing the number `6` as a 5x5 box.
 pub fn six_5x5_frame() -> Frame {
     vec![
         vec![" ", "X", "X", "X", " "],
@@ -130,6 +149,7 @@ pub fn six_5x5_frame() -> Frame {
     ]
 }
 
+/// Representing the number `7` as a 5x5 box.
 pub fn seven_5x5_frame() -> Frame {
     vec![
         vec![" ", "X", "X", "X", "X"],
@@ -140,6 +160,7 @@ pub fn seven_5x5_frame() -> Frame {
     ]
 }
 
+/// Representing the number `8` as a 5x5 box.
 pub fn eight_5x5_frame() -> Frame {
     vec![
         vec![" ", "X", "X", "X", " "],
@@ -150,6 +171,7 @@ pub fn eight_5x5_frame() -> Frame {
     ]
 }
 
+/// Representing the number `9` as a 5x5 box.
 pub fn nine_5x5_frame() -> Frame {
     vec![
         vec![" ", "X", "X", "X", " "],
@@ -160,6 +182,7 @@ pub fn nine_5x5_frame() -> Frame {
     ]
 }
 
+/// Representing the number `0` as a 5x5 box.
 pub fn zero_5x5_frame() -> Frame {
     vec![
         vec![" ", "X", "X", "X", " "],

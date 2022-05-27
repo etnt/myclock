@@ -1,3 +1,11 @@
+/// # GDC - Great Digital Clock
+///
+/// This is just a fun little exercise to learn Rust and to
+/// playaround with some Terminal graphics.
+///
+/// A Great Digital Clock is displayed as ASCII graphics;
+/// ticking away every second.
+///
 mod widgets;
 
 use anyhow::Result;
@@ -13,8 +21,13 @@ use std::{
     thread,
     time::{self, Duration},
 };
-use widgets::Widget5x5;
+use widgets::{colon_frame, draw_widget, Widget5x5};
 
+/// The main loop is responsible for setting up and tearing down
+/// the terminal. It will create the needed widgets and enter a
+/// loop that will, for each second, extract the current time and
+/// then invoke all the number widgets with the corresponding
+/// number in order to have them drawn on the terminal.
 fn main() {
     let mut stdout = io::stdout();
     setup_terminal(&mut stdout).unwrap();
@@ -23,11 +36,13 @@ fn main() {
 
     let mut hw1 = Widget5x5::new(1, 1);
     let mut hw2 = Widget5x5::new(8, 1);
-    let mut mw1 = Widget5x5::new(15, 1);
-    let mut mw2 = Widget5x5::new(22, 1);
-    let mut sw1 = Widget5x5::new(29, 1);
-    let mut sw2 = Widget5x5::new(36, 1);
+    let mut mw1 = Widget5x5::new(18, 1);
+    let mut mw2 = Widget5x5::new(25, 1);
+    let mut sw1 = Widget5x5::new(36, 1);
+    let mut sw2 = Widget5x5::new(43, 1);
 
+    draw_widget(&mut stdout, 15, 1, colon_frame());
+    draw_widget(&mut stdout, 33, 1, colon_frame());
     loop {
         if is_event_available().unwrap() {
             break;
@@ -42,26 +57,11 @@ fn main() {
         thread::sleep(delay);
     }
 
-    // 'top: for i in 0..=1 {
-    //     for j in 0..=2 {
-    //         if is_event_available().unwrap() {
-    //             break 'top;
-    //         }
-    //         w2.draw(&mut stdout, j).unwrap();
-    //         thread::sleep(delay);
-    //     }
-    //     w1.draw(&mut stdout, i).unwrap();
-    //     thread::sleep(delay);
-    // }
-
     teardown_terminal(&mut stdout).unwrap();
-
-    let (h1, h2, m1, m2, s1, s2) = current_time();
-    println!("Hour: {}{}:{}{}:{}{}", h1, h2, m1, m2, s1, s2);
-
     exit(0);
 }
 
+/// Return the current time, split up in its components as integers.
 fn current_time() -> (usize, usize, usize, usize, usize, usize) {
     let local = Local::now();
     let hours = local.hour();
@@ -77,6 +77,7 @@ fn current_time() -> (usize, usize, usize, usize, usize, usize) {
     )
 }
 
+/// Check for any kind of terminal events.
 fn is_event_available() -> crossterm::Result<bool> {
     // Zero duration says that the `poll` function must return immediately
     // with an `Event` availability information
