@@ -8,3 +8,4 @@ edition = "2021"
 [dependencies]
 anyhow = "1"
 crossterm = "0.23"
+chrono = "0.4"

@@ -7,14 +7,22 @@ type Frame = Vec<Vec<&'static str>>;
 pub struct Widget5x5 {
     x: usize,
     y: usize,
+    cur_num: usize, // to optimize: do not redraw an identical number
 }
 
 impl Widget5x5 {
     pub fn new(x: usize, y: usize) -> Self {
-        Self { x, y }
+        Self {
+            x,
+            y,
+            cur_num: usize::MAX,
+        }
     }
 
     pub fn draw(&mut self, stdout: &mut Stdout, number: usize) -> Result<()> {
+        if number == self.cur_num {
+            return Ok(());
+        }
         draw_empty(stdout, self.x, self.y);
         match number {
             0 => draw_widget(stdout, self.x, self.y, zero_5x5_frame()),
@@ -29,6 +37,7 @@ impl Widget5x5 {
             9 => draw_widget(stdout, self.x, self.y, nine_5x5_frame()),
             _ => bail!("wrong widget number given"),
         }
+        self.cur_num = number;
         Ok(())
     }
 }
