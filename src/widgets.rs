@@ -10,21 +10,21 @@ type Frame = Vec<Vec<&'static str>>;
 /// As an optimization, the box will not redraw an
 /// identical, already drawn, number.
 pub struct Widget5x5 {
-    x: usize,
-    y: usize,
-    cur_num: usize,
+    x: i32,
+    y: i32,
+    cur_num: i32,
 }
 
 impl Widget5x5 {
-    pub fn new(x: usize, y: usize) -> Self {
+    pub fn new(x: i32, y: i32) -> Self {
         Self {
             x,
             y,
-            cur_num: usize::MAX,
+            cur_num: i32::MAX,
         }
     }
 
-    pub fn draw(&mut self, stdout: &mut Stdout, number: usize) -> Result<()> {
+    pub fn draw(&mut self, stdout: &mut Stdout, number: i32) -> Result<()> {
         if number == self.cur_num {
             return Ok(());
         }
@@ -48,23 +48,74 @@ impl Widget5x5 {
 }
 
 /// Draw an empty 5x5 box.
-pub fn draw_empty(stdout: &mut Stdout, start_x: usize, start_y: usize) {
+pub fn draw_empty(stdout: &mut Stdout, start_x: i32, start_y: i32) {
     draw_widget(stdout, start_x, start_y, empty_5x5_frame());
 }
 
 /// Draw the given box.
-pub fn draw_widget(stdout: &mut Stdout, start_x: usize, start_y: usize, frame: Frame) {
+pub fn draw_widget(stdout: &mut Stdout, start_x: i32, start_y: i32, frame: Frame) {
     for (y, col) in frame.iter().enumerate() {
         for (x, s) in col.iter().enumerate() {
-            queue!(
-                stdout,
-                MoveTo((start_x + x) as u16, (start_y + y) as u16),
-                Print(*s),
-            )
-            .unwrap();
+            let (i, j) = rotate((start_x, start_y), (x as i32, y as i32));
+            queue!(stdout, MoveTo((i) as u16, (j) as u16), Print(*s),).unwrap();
         }
     }
     stdout.flush().unwrap();
+}
+
+struct Pos {
+    x: i32,
+    y: i32,
+}
+pub fn rotate(start_pos: (i32, i32), cur_pos: (i32, i32)) -> (i32, i32) {
+    let (sx, sy) = start_pos;
+    let (cx, cy) = cur_pos;
+    let mut pos = Pos::new(cx, cy);
+    pos.translate(-sx, -sy).rot90().translate(sx, sy);
+
+    (pos.x, pos.y)
+}
+
+impl Pos {
+    pub fn new(x: i32, y: i32) -> Self {
+        Self { x, y }
+    }
+
+    pub fn translate(&mut self, tx: i32, ty: i32) -> &mut Pos {
+        self.x += tx;
+        self.y += ty;
+        self
+    }
+
+    pub fn rot90(&mut self) -> &mut Pos {
+        self.multiply(Matrix2x2::matrix90counterclockwise())
+    }
+
+    pub fn multiply(&mut self, m: Matrix2x2) -> &mut Pos {
+        let x = self.x;
+        let y = self.y;
+        self.x = m.a * x + m.b * y;
+        self.y = m.c * x + m.d * y;
+        self
+    }
+}
+
+struct Matrix2x2 {
+    a: i32,
+    b: i32,
+    c: i32,
+    d: i32,
+}
+
+impl Matrix2x2 {
+    pub fn matrix90counterclockwise() -> Self {
+        Self {
+            a: 0,
+            b: -1,
+            c: 1,
+            d: 0,
+        }
+    }
 }
 
 /// Representing a `colon` character.
