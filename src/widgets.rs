@@ -1,8 +1,60 @@
 use anyhow::{bail, Result};
 use crossterm::{cursor::MoveTo, queue, style::Print};
-use std::io::{Stdout, Write};
+use std::io::{stdout, Stdout, Write};
 
 type Frame = Vec<Vec<&'static str>>;
+
+// These spinner chars was stolen from the `gitui` code.
+static SPINNER_CHARS: &[char] = &['⣷', '⣯', '⣟', '⡿', '⢿', '⣻', '⣽', '⣾'];
+
+#[derive(Clone, Copy)]
+pub struct Spinner {
+    x: usize,
+    y: usize,
+    pos: usize,
+}
+
+impl Spinner {
+    pub fn new(x: usize, y: usize, pos: usize) -> Self {
+        Self { x, y, pos: pos % 8 }
+    }
+    pub fn draw(&self) -> Result<()> {
+        let mut stdout = stdout();
+        queue!(
+            stdout,
+            MoveTo(self.x as u16, self.y as u16),
+            Print(SPINNER_CHARS[self.pos]),
+        )
+        .unwrap();
+        stdout.flush().unwrap();
+        Ok(())
+    }
+    pub fn bump(&mut self) -> Result<()> {
+        self.pos = (self.pos + 1) % 8;
+        Ok(())
+    }
+}
+
+pub struct FancyColon {
+    c1: Spinner,
+    c2: Spinner,
+}
+
+impl FancyColon {
+    pub fn new(x: usize, y: usize, pos: usize) -> Self {
+        Self {
+            c1: Spinner::new(x, y + 1, pos),
+            c2: Spinner::new(x, y + 3, pos),
+        }
+    }
+    pub fn draw(&mut self) -> Result<()> {
+        self.c1.draw()?;
+        self.c2.draw()?;
+        self.c1.bump()?;
+        self.c2.bump()?;
+        Ok(())
+    }
+}
 
 /// A 5x5 box anchored to a starting position.
 /// The box will know how to draw a number given
@@ -68,9 +120,9 @@ pub fn draw_widget(stdout: &mut Stdout, start_x: usize, start_y: usize, frame: F
 }
 
 /// Representing a `colon` character.
-pub fn colon_frame() -> Frame {
-    vec![vec![" "], vec!["O"], vec![" "], vec!["O"], vec![" "]]
-}
+//pub fn colon_frame() -> Frame {
+//    vec![vec![" "], vec!["O"], vec![" "], vec!["O"], vec![" "]]
+//}
 
 /// Representing an empty 5x5 box.
 pub fn empty_5x5_frame() -> Frame {

@@ -22,7 +22,7 @@ use std::{
     thread,
     time::{Duration, Instant},
 };
-use widgets::{colon_frame, draw_widget, Widget5x5};
+use widgets::{FancyColon, Widget5x5};
 
 /// The main loop is responsible for setting up and tearing down
 /// the terminal. It will create the needed widgets and enter a
@@ -43,8 +43,12 @@ fn main() {
     let mut sw1 = Widget5x5::new(36, 1);
     let mut sw2 = Widget5x5::new(43, 1);
 
-    draw_widget(&mut stdout, 15, 1, colon_frame());
-    draw_widget(&mut stdout, 33, 1, colon_frame());
+    //draw_widget(&mut stdout, 15, 1, colon_frame());
+    //draw_widget(&mut stdout, 33, 1, colon_frame());
+    let mut colon1 = FancyColon::new(15, 1, 0);
+    let mut colon2 = FancyColon::new(33, 1, 0);
+
+    let mut force = true;
     loop {
         if is_event_available().unwrap() {
             break;
@@ -56,7 +60,8 @@ fn main() {
         instant = Instant::now();
         clock_delay.update(delta);
 
-        if clock_delay.ready {
+        if clock_delay.ready | force {
+            force = false; // force draw the very first time...
             clock_delay.reset();
             let (h1, h2, m1, m2, s1, s2) = current_time();
             hw1.draw(&mut stdout, h1).unwrap();
@@ -66,6 +71,8 @@ fn main() {
             sw1.draw(&mut stdout, s1).unwrap();
             sw2.draw(&mut stdout, s2).unwrap();
         }
+        colon1.draw().unwrap();
+        colon2.draw().unwrap();
         thread::sleep(Duration::from_millis(100));
     }
 
