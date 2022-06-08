@@ -15,11 +15,12 @@ use crossterm::{
     event::poll,
     terminal::{self, EnterAlternateScreen, LeaveAlternateScreen},
 };
+use rusty_time::prelude::Timer;
 use std::{
     io::{self, Stdout},
     process::exit,
     thread,
-    time::{self, Duration},
+    time::{Duration, Instant},
 };
 use widgets::{colon_frame, draw_widget, Widget5x5};
 
@@ -32,7 +33,8 @@ fn main() {
     let mut stdout = io::stdout();
     setup_terminal(&mut stdout).unwrap();
 
-    let delay = time::Duration::from_millis(1000);
+    let mut clock_delay = Timer::from_millis(1000);
+    let mut instant: Instant = Instant::now();
 
     let mut hw1 = Widget5x5::new(1, 1);
     let mut hw2 = Widget5x5::new(8, 1);
@@ -47,14 +49,24 @@ fn main() {
         if is_event_available().unwrap() {
             break;
         }
-        let (h1, h2, m1, m2, s1, s2) = current_time();
-        hw1.draw(&mut stdout, h1).unwrap();
-        hw2.draw(&mut stdout, h2).unwrap();
-        mw1.draw(&mut stdout, m1).unwrap();
-        mw2.draw(&mut stdout, m2).unwrap();
-        sw1.draw(&mut stdout, s1).unwrap();
-        sw2.draw(&mut stdout, s2).unwrap();
-        thread::sleep(delay);
+
+        // We want to do stuff inside a second,
+        // hence this delta time handling.
+        let delta: Duration = instant.elapsed();
+        instant = Instant::now();
+        clock_delay.update(delta);
+
+        if clock_delay.ready {
+            clock_delay.reset();
+            let (h1, h2, m1, m2, s1, s2) = current_time();
+            hw1.draw(&mut stdout, h1).unwrap();
+            hw2.draw(&mut stdout, h2).unwrap();
+            mw1.draw(&mut stdout, m1).unwrap();
+            mw2.draw(&mut stdout, m2).unwrap();
+            sw1.draw(&mut stdout, s1).unwrap();
+            sw2.draw(&mut stdout, s2).unwrap();
+        }
+        thread::sleep(Duration::from_millis(100));
     }
 
     teardown_terminal(&mut stdout).unwrap();
