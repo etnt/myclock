@@ -7,6 +7,11 @@ type Frame = Vec<Vec<&'static str>>;
 // These spinner chars was stolen from the `gitui` code.
 static SPINNER_CHARS: &[char] = &['⣷', '⣯', '⣟', '⡿', '⢿', '⣻', '⣽', '⣾'];
 
+
+static ROCKET_SHIP: char = '\u{1F680}';
+static MARTINI_EMOJI: char = '\u{1F378}';
+
+
 #[derive(Clone, Copy)]
 pub struct Spinner {
     x: usize,
@@ -24,6 +29,7 @@ impl Spinner {
             stdout,
             MoveTo(self.x as u16, self.y as u16),
             Print(SPINNER_CHARS[self.pos]),
+            //Print(MARTINI_EMOJI),
         )
         .unwrap();
         stdout.flush().unwrap();
